@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include <cryptl/BitwiseINT.hpp>
+//#include <cryptl/BitwiseINT.hpp>
 
 #include <snarklib/FpModel.hpp>
 
@@ -43,6 +43,8 @@ T evalOp(const LogicalOps op, const T& x, const T& y)
     case (LogicalOps::SAME) : return x == y;
     case (LogicalOps::CMPLMNT) : return ! x;
     }
+	CCASSERT(0);
+	return x;
 }
 
 // evaluate scalar arithmetic operations
@@ -54,6 +56,8 @@ T evalOp(const ScalarOps op, const T& x, const T& y)
     case (ScalarOps::SUB) : return x - y;
     case (ScalarOps::MUL) : return x * y;
     }
+	CCASSERT(0);
+	return x;
 }
 
 // evaluate finite scalar field arithmetic operations
@@ -66,8 +70,11 @@ T evalOp(const FieldOps op, const T& x, const T& y)
     case (FieldOps::MUL) : return x * y;
     case (FieldOps::INV) : return snarklib::inverse(x);
     }
+	CCASSERT(0);
+	return x;
 }
 
+#if 0 // no cryptl
 // evaluate bitwise word operations
 template <typename T>
 T evalOp(const BitwiseOps op, const T& x, const T& y)
@@ -87,7 +94,10 @@ T evalOp(const BitwiseOps op, const T& x, const T& y)
     case (BitwiseOps::ROTL) : return B::ROTL(x, y);
     case (BitwiseOps::ROTR) : return B::ROTR(x, y);
     }
+	CCASSERT(0);
+	return x;
 }
+#endif // no cryptl
 
 // evaluate equality comparison operations
 template <typename T>
@@ -97,6 +107,8 @@ bool evalOp(const EqualityCmp op, const T& x, const T& y)
     case (EqualityCmp::EQ) : return x == y;
     case (EqualityCmp::NEQ) : return x != y;
     }
+	CCASSERT(0);
+	return false;
 }
 
 // evaluate scalar comparsion operations
@@ -111,6 +123,8 @@ bool evalOp(const ScalarCmp op, const T& x, const T& y)
     case (ScalarCmp::GT) : return y < x;
     case (ScalarCmp::GE) : return (y < x) || (x == y);
     }
+	CCASSERT(0);
+	return false;
 }
 
 } // namespace snarkfront

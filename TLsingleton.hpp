@@ -17,8 +17,13 @@ public:
     ~TL() = default;
 
     static TL<T>& singleton() {
-        thread_local static TL<T> obj;
-        return obj;
+        thread_local static TL<T> *obj;
+		if (!obj)
+		{
+			obj = new TL<T>;	// memory leak
+			//std::cerr << "class TL new thread_local object at " << std::hex << (std::uintptr_t)obj << std::dec << std::endl;
+		}
+        return *obj;
     }
 
     T& operator* () {
@@ -37,7 +42,7 @@ public:
         return std::addressof(m_value);
     }
 
-private:    
+private:
     TL() = default;
 
     T m_value;

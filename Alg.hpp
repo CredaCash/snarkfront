@@ -59,8 +59,9 @@ Alg_uint64 = Alg<std::uint64_t,
                  BitwiseOps,
                  EqualityCmp>;
 
+typedef snarklib::BigInt<4> bigint_t;  // N = 4 is 256 bits on x86-64
 template <typename FR> using
-Alg_BigInt = Alg<snarklib::BigInt<2>, // N = 2 is 128 bits on x86-64
+Alg_BigInt = Alg<bigint_t,
                  FR,
                  ScalarOps,
                  ScalarCmp>;
@@ -90,7 +91,7 @@ std::string valueToString(const snarklib::BigInt<N>& a) {
 template <typename FR>
 std::string valueToString(const FR& a) {
 #ifdef USE_ASSERT
-    assert(1 == a.dimension()); // always true for elliptic curve
+    CCASSERT(1 == a.dimension()); // always true for elliptic curve
                                 // scalar field
 #endif
     return valueToString(a[0].asBigInt());
@@ -118,13 +119,13 @@ public:
     void bless(const T& a) {
         // object is not already initialized
 #ifdef USE_ASSERT
-        assert(m_splitBits.empty());
-        assert(m_r1Terms.empty());
+        //CCASSERT(m_splitBits.empty());		// not needed
+        //CCASSERT(m_r1Terms.empty());
 #endif
 
         m_value = VAL(a);
-        m_witness = FR(valueToString(VAL(a)));
-        m_splitBits = valueBits(VAL(a));
+        m_witness = FR(a);	//valueToString(VAL(a)));
+        //m_splitBits = valueBits(VAL(a));		// not needed
 
         initTerms(true);
     }
@@ -138,8 +139,8 @@ public:
     template <typename T>
     Alg(const T& a, const bool blessed)
         : m_value(a),
-          m_witness(valueToString(VAL(a))),
-          m_splitBits(valueBits(VAL(a)))
+          m_witness(valueToString(VAL(a)))
+          //m_splitBits(valueBits(VAL(a))),		// not needed
     {
         initTerms(blessed);
     }
@@ -153,10 +154,10 @@ public:
     Alg(const VAL& a,
         const FR& b,
         const std::vector<int>& c,
-        const std::vector<R1T>& d)
+        const std::array<R1T, 1>& d)
         : m_value(a),
           m_witness(b),
-          m_splitBits(c),
+          //m_splitBits(c),		// not needed
           m_r1Terms(d)
     {}
 
@@ -174,13 +175,15 @@ public:
         return m_witness;
     }
 
+#if 0 		// not needed
     // bits for witness split
     const std::vector<int>& splitBits() const {
         return m_splitBits;
     }
+#endif
 
     // return constraint terms for bit representation
-    const std::vector<R1T>& r1Terms() const {
+    const std::array<R1T, 1>& r1Terms() const {
         return m_r1Terms;
     }
 
@@ -244,7 +247,7 @@ public:
 
 #ifdef USE_ASSERT
         // source must be: bool, 8-bit, 32-bit, 64-bit
-        assert(x.size() <= 64);
+        CCASSERT(x.size() <= 64);
 #endif
 
         if (1 == x.size()) {
@@ -279,7 +282,7 @@ private:
     VAL valueFromWitness(const R1Cowitness<FR>& input) const {
         const std::size_t peekID = TL<R1C<FR>>::singleton()->counterID();
 #ifdef USE_ASSERT
-        assert(peekID <= input.sizeSTR());
+        CCASSERT(peekID <= input.sizeSTR());
 #endif
 
         std::stringstream ss(input[peekID]);
@@ -287,7 +290,7 @@ private:
         VAL value;
         ss >> value;
 #ifdef USE_ASSERT
-        assert(!!ss);
+        CCASSERT(!!ss);
 #endif
 
         return value;
@@ -297,14 +300,27 @@ private:
         auto& RS = TL<R1C<FR>>::singleton();
 
         // create terms for bits, may be constant or variable
-        m_r1Terms.reserve(sizeBits(m_value));
+		auto nbits = 0;	// m_splitBits.size(); 		// m_splitBits not needed
+		if (nbits == 0)
+		{
+			//m_r1Terms.reserve(1);
+			m_r1Terms[0] = //.emplace_back(
+					RS->createTerm(m_value, blessed);
+
+			//if (blessed)
+			//	RS->witnessTerms(m_r1Terms, m_value);	// not needed
+		}
+#if 0 // not needed
+		else
+		{
+			m_r1Terms.reserve(nbits);
         for (const auto& b : m_splitBits) {
             m_r1Terms.emplace_back(
                 RS->createTerm(boolTo<FR>(b), blessed));
         }
 
 #ifdef USE_ASSERT
-        assert(m_splitBits.size() == m_r1Terms.size());
+        CCASSERT(m_splitBits.size() == m_r1Terms.size());
 #endif
 
         if (blessed) {
@@ -316,11 +332,13 @@ private:
                 RS->addBooleanity(b);
         }
     }
+#endif
+	}
 
     VAL m_value;
     FR m_witness;
-    std::vector<int> m_splitBits;
-    std::vector<R1T> m_r1Terms;
+    //std::vector<int> m_splitBits;		// not needed
+    std::array<R1T, 1> m_r1Terms;
 };
 
 } // namespace snarkfront

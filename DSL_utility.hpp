@@ -11,11 +11,11 @@
 
 #include <snarklib/Util.hpp>
 
-#include <cryptl/ASCII_Hex.hpp>
+//#include <cryptl/ASCII_Hex.hpp>
 
 #include <snarkfront/Alg.hpp>
 #include <snarkfront/AST.hpp>
-#include <snarkfront/BitwiseAST.hpp>
+//#include <snarkfront/BitwiseAST.hpp>
 #include <snarkfront/DSL_base.hpp>
 
 namespace snarkfront {
@@ -76,6 +76,7 @@ std::size_t sizeBits(const AST_Var<ALG>&) {
 // convert between hexadecimal ASCII and binary
 //
 
+#if 0 // no cryptl
 #define DEFN_ASCII_HEX_ARRAY(BITS)                      \
 template <typename FR, std::size_t N>                   \
 std::string asciiHex(                                   \
@@ -111,6 +112,7 @@ DEFN_ASCII_HEX_VECTOR(32)
 DEFN_ASCII_HEX_VECTOR(64)
 
 #undef DEFN_ASCII_HEX_VECTOR
+#endif // no cryptl
 
 ////////////////////////////////////////////////////////////////////////////////
 // serialize hash digests and preimages
@@ -245,7 +247,7 @@ AST_Op<Alg_Field<FR>> pow(const AST_Node<Alg_Field<FR>>& base,
 
 #ifdef USE_ASSERT
     // no exponent bits does not make sense
-    assert(expBits > 0);
+    CCASSERT(expBits > 0);
 #endif
 
     if (1 == expBits) {

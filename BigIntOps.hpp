@@ -8,6 +8,11 @@
 #include <gmp.h>
 
 #include <snarklib/BigInt.hpp>
+#include <snarklib/EC_BN128_Modulus.hpp>
+
+#ifndef BIGINT_MOD
+#define BIGINT_MOD 1
+#endif
 
 namespace snarkfront {
 
@@ -21,10 +26,20 @@ namespace snarkfront {
 template <mp_size_t N>
 bool addBigInt(const snarklib::BigInt<N>& a,
                const snarklib::BigInt<N>& b,
-               snarklib::BigInt<N>& c)
+               snarklib::BigInt<N>& c,
+				bool modprime = BIGINT_MOD)
 {
     const mp_limb_t carry = mpn_add_n(c.data(), a.data(), b.data(), N);
-    return ! carry; // failure if overflow
+	(void)carry;	// avoid unused variable warning
+
+	if (modprime)
+	{
+		CCASSERT(N == snarklib::BN128_Modulus::r_limbs);
+		if (mpn_cmp(c.data(), snarklib::BN128_Modulus::modulus_r().data(), N) >= 0)
+			mpn_sub_n(c.data(), c.data(), snarklib::BN128_Modulus::modulus_r().data(), N);
+	}
+
+    return true;	// ! carry; // failure if overflow
 }
 
 template <mp_size_t N>
@@ -34,7 +49,7 @@ snarklib::BigInt<N> operator+ (const snarklib::BigInt<N>& a,
     snarklib::BigInt<N> c;
     const bool ok = addBigInt(a, b, c);
 #ifdef USE_ASSERT
-    assert(ok);
+    CCASSERT(ok);
 #endif
     return c;
 }
@@ -45,14 +60,36 @@ snarklib::BigInt<N> operator+ (const snarklib::BigInt<N>& a,
 template <mp_size_t N>
 bool subBigInt(const snarklib::BigInt<N>& a,
                const snarklib::BigInt<N>& b,
-               snarklib::BigInt<N>& c)
+               snarklib::BigInt<N>& c,
+				bool modprime = BIGINT_MOD)
 {
-    if (mpn_cmp(a.data(), b.data(), N) < 0) return false; // failure
+    //if (mpn_cmp(a.data(), b.data(), N) < 0) return false; // failure
                                                           // if b > a
-    const mp_limb_t borrow = mpn_sub(c.data(), a.data(), N, b.data(), N);
+    const mp_limb_t borrow = mpn_sub_n(c.data(), a.data(), b.data(), N);
+	(void)borrow;	// avoid unused variable warning
 #ifdef USE_ASSERT
-    assert(0 == borrow);
+    //CCASSERT(0 == borrow);
 #endif
+
+	//std::cerr << "subBigInt borrow " << borrow << " modprime " << modprime << std::endl;
+
+	if (modprime && borrow)
+	{
+		CCASSERT(N == snarklib::BN128_Modulus::r_limbs);
+		mpn_add_n(c.data(), c.data(), snarklib::BN128_Modulus::modulus_r().data(), N);
+		//std::cerr << "subBigInt added modulus result " << std::hex << c << std::dec << std::endl;
+	}
+
+	if (modprime)
+	{
+		CCASSERT(N == snarklib::BN128_Modulus::r_limbs);
+		if (mpn_cmp(c.data(), snarklib::BN128_Modulus::modulus_r().data(), N) >= 0)
+		{
+			mpn_sub_n(c.data(), c.data(), snarklib::BN128_Modulus::modulus_r().data(), N);
+			//std::cerr << "subBigInt subtracted modulus result " << std::hex << c << std::dec << std::endl;
+		}
+	}
+
     return true;
 }
 
@@ -63,7 +100,7 @@ snarklib::BigInt<N> operator- (const snarklib::BigInt<N>& a,
     snarklib::BigInt<N> c;
     const bool ok = subBigInt(a, b, c);
 #ifdef USE_ASSERT
-    assert(ok);
+    CCASSERT(ok);
 #endif
     return c;
 }
@@ -74,16 +111,25 @@ snarklib::BigInt<N> operator- (const snarklib::BigInt<N>& a,
 template <mp_size_t N>
 bool mulBigInt(const snarklib::BigInt<N>& a,
                const snarklib::BigInt<N>& b,
-               snarklib::BigInt<N>& c)
+               snarklib::BigInt<N>& c,
+				bool modprime = BIGINT_MOD)
 {
     std::array<mp_limb_t, 2*N> scratch;
     mpn_mul_n(scratch.data(), a.data(), b.data(), N);
 
     for (std::size_t i = N; i < 2*N; ++i) {
-        if (scratch[i]) return false; // failure if overflow
+    //    if (scratch[i]) return false; // failure if overflow
     }
 
-    mpn_copyi(c.data(), scratch.data(), N);
+	if (modprime)
+	{
+		CCASSERT(N == snarklib::BN128_Modulus::r_limbs);
+		std::array<mp_limb_t, 2*N> q;
+		mpn_tdiv_qr(q.data(), c.data(), 0, scratch.data(), 2*N, snarklib::BN128_Modulus::modulus_r().data(), N);
+	}
+	else
+	    mpn_copyi(c.data(), scratch.data(), N);
+
     return true;
 }
 
@@ -94,9 +140,56 @@ snarklib::BigInt<N> operator* (const snarklib::BigInt<N>& a,
     snarklib::BigInt<N> c;
     const bool ok = mulBigInt(a, b, c);
 #ifdef USE_ASSERT
-    assert(ok);
+    CCASSERT(ok);
 #endif
     return c;
+}
+
+template <mp_size_t N>
+snarklib::BigInt<N> operator/ (const snarklib::BigInt<N>& n, const mp_limb_t& d)
+{
+    snarklib::BigInt<N> q;
+	mp_limb_t rem;
+	mpn_tdiv_qr(q.data(), &rem, 0, n.data(), N, &d, 1);
+	return q;
+}
+
+template <mp_size_t N>
+mp_limb_t operator% (const snarklib::BigInt<N>& n, const mp_limb_t& d)
+{
+    snarklib::BigInt<N> q;
+	mp_limb_t rem;
+	mpn_tdiv_qr(q.data(), &rem, 0, n.data(), N, &d, 1);
+	return rem;
+}
+
+template <mp_size_t N>
+int cmpBigInt (const snarklib::BigInt<N>& a,
+                               const snarklib::BigInt<N>& b)
+{
+	for (int i = N - 1; i >= 0; --i)
+	{
+		if (a.data()[i] > b.data()[i])
+			return 1;
+		if (a.data()[i] < b.data()[i])
+			return -1;
+	}
+
+	return 0;
+}
+
+template <mp_size_t N>
+bool operator> (const snarklib::BigInt<N>& a,
+                               const snarklib::BigInt<N>& b)
+{
+	return cmpBigInt(a,b) > 0;
+}
+
+template <mp_size_t N>
+bool operator>= (const snarklib::BigInt<N>& a,
+                               const snarklib::BigInt<N>& b)
+{
+	return cmpBigInt(a,b) >= 0;
 }
 
 //

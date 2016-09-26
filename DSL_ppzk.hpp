@@ -10,7 +10,7 @@
 #include <snarklib/ProgressCallback.hpp>
 
 #include <snarkfront/Alg.hpp>
-#include <snarkfront/Alg_bool.hpp>
+//#include <snarkfront/Alg_bool.hpp>
 #include <snarkfront/DSL_base.hpp>
 #include <snarkfront/R1C.hpp>
 #include <snarkfront/TLsingleton.hpp>

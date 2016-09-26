@@ -99,9 +99,12 @@ public:
             m_str.emplace_back(value);
         }
 
-        // consume trailing space
-        char c;
-        if (!is.get(c) || (' ' != c)) return false;
+		if (numberElems)
+		{
+			// consume trailing space
+			char c;
+			if (!is.get(c) || (' ' != c)) return false;
+		}
 
         return true;
     }
@@ -269,12 +272,14 @@ public:
         return createTerm(a, false);
     }
 
+#if 0 // not needed
     template <typename VAL>
     void witnessTerms(const std::vector<R1T>& r1Terms, const VAL& value) {
         std::stringstream ss;
         ss << value;
         addWitness(r1Terms, ss.str());
     }
+#endif
 
     void addBooleanity(const R1T& x) {
         rank1_booleanity(m_constraintSystem, x);
@@ -333,11 +338,11 @@ public:
     // argument as scalar, converts bit representation as necessary
     template <typename ALG>
     R1T argScalar(const ALG& arg) {
-        const std::size_t termCnt = arg.r1Terms().size();
+        //const std::size_t termCnt = arg.r1Terms().size();	// not needed
 
         typename ALG::ValueType dummy;
 #ifdef USE_ASSERT
-        assert(sizeBits(dummy) == termCnt || 1 == termCnt);
+        //CCASSERT(sizeBits(dummy) == termCnt || 1 == termCnt);
 #endif
 
         // For bool, sizeBits(dummy) is 1 so conditional always fails.
@@ -346,9 +351,10 @@ public:
         // BigInt and Field, termCnt is always 1 so conditional fails.
         // The conditional can only be true for uint8/32/64 when not
         // ADDMOD or MULMOD.
-        return ((sizeBits(dummy) == termCnt) && (1 != termCnt))
-            ? bitsToWitness(arg.r1Terms(), arg.witness())
-            : arg.r1Terms()[0];
+        return // ((sizeBits(dummy) == termCnt) && (1 != termCnt))	// not needed
+            // ? bitsToWitness(arg.r1Terms(), arg.witness())	// not needed
+            // :
+			arg.r1Terms()[0];
     }
 
     // argument as bit representation, converts scalar as necessary
@@ -358,7 +364,7 @@ public:
 
         typename ALG::ValueType dummy;
 #ifdef USE_ASSERT
-        assert(sizeBits(dummy) == termCnt || 1 == termCnt);
+        CCASSERT(sizeBits(dummy) == termCnt || 1 == termCnt);
 #endif
 
         // For bool, sizeBits(dummy) is 1 so conditional always fails.
@@ -561,7 +567,7 @@ public:
     // z = OR(x[0],... , x[2^N - 1])
     // zero knowledge OR gate with power of 2 number of inputs
     R1T imperative_OR(const std::vector<R1T>& x,
-                      const std::vector<int>& witness) 
+                      const std::vector<int>& witness)
     {
         return imperative_GATE(LogicalOps::OR, x, witness);
     }
@@ -578,13 +584,13 @@ private:
     template <typename ENUM>
     R1T imperative_GATE(const ENUM op,
                         const std::vector<R1T>& x,
-                        const std::vector<int>& witness) 
+                        const std::vector<int>& witness)
     {
         const std::size_t N = x.size();
         const std::size_t halfN = N / 2;
 #ifdef USE_ASSERT
-        assert(N == 2 * halfN);
-        assert(N == witness.size());
+        CCASSERT(N == 2 * halfN);
+        CCASSERT(N == witness.size());
 #endif
 
         if (2 == N) {
@@ -634,12 +640,14 @@ private:
         addWitness(x.var(), value);
     }
 
+#if 0 // the public inputs are set by the prover and verifier, not from m_witness_str, so we don't need to keep track of these
     void addWitness(const std::vector<R1T>& r1Terms, const std::string& value) {
         m_witness_str.emplace_back(
             std::pair<std::size_t, std::string>(
                 r1Terms.front().index(),
                 value));
     }
+#endif
 
     void addSplit(const R1T& x, const std::vector<R1T>& b) {
         rank1_split(m_constraintSystem, x, b);
@@ -648,7 +656,7 @@ private:
     // z = OP(x, y)
     void addConstraint(const LogicalOps op, const R1T& x, const R1T& y, const R1T& z) {
 #ifdef USE_ASSERT
-        assert(z.isVariable() && (x.isVariable() || y.isVariable()));
+        CCASSERT(z.isVariable() && (x.isVariable() || y.isVariable()));
 #endif
 
         switch (op) {
@@ -677,7 +685,7 @@ private:
     // z = OP(x, y)
     void addConstraint(const ScalarOps op, const R1T& x, const R1T& y, const R1T& z) {
 #ifdef USE_ASSERT
-        assert(z.isVariable() && (x.isVariable() || y.isVariable()));
+        CCASSERT(z.isVariable() && (x.isVariable() || y.isVariable()));
 #endif
 
         switch (op) {
@@ -698,7 +706,7 @@ private:
     // z = OP(x, y)
     void addConstraint(const FieldOps op, const R1T& x, const R1T& y, const R1T& z) {
 #ifdef USE_ASSERT
-        assert(z.isVariable() && (x.isVariable() || y.isVariable()));
+        CCASSERT(z.isVariable() && (x.isVariable() || y.isVariable()));
 #endif
 
         switch (op) {
@@ -723,7 +731,7 @@ private:
     // z = OP(x, y)
     void addConstraint(const BitwiseOps op, const R1T& x, const R1T& y, const R1T& z) {
 #ifdef USE_ASSERT
-        assert(z.isVariable() && (x.isVariable() || y.isVariable()));
+        CCASSERT(z.isVariable() && (x.isVariable() || y.isVariable()));
 #endif
 
         switch (op) {
@@ -759,7 +767,7 @@ private:
 
     R1T otherTermZero(const BitwiseOps op, const R1T& x) {
 #ifdef USE_ASSERT
-        assert(x.isVariable());
+        CCASSERT(x.isVariable());
 #endif
 
         switch (op) {
@@ -805,6 +813,7 @@ private:
     // variable indices
     Counter<std::size_t> m_counter;
 
+public:
     // quadratic constraint system
     bool m_swap_AB_if_beneficial;
     snarklib::HugeSystem<FR> m_constraintSystem;

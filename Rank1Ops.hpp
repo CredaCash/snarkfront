@@ -23,7 +23,7 @@ void rank1_booleanity(SYS<FR>& S,
                       const snarklib::R1Variable<FR>& x)
 {
 #ifdef USE_ASSERT
-    assert(! x.zeroIndex());
+    CCASSERT(! x.zeroIndex());
 #endif
     S.addConstraint(x * (FR::one() - x) == FR::zero()); // only roots are 0 and 1
 }
@@ -33,7 +33,7 @@ void rank1_booleanity(SYS<FR>& S,
                       const snarklib::R1Term<FR>& x)
 {
 #ifdef USE_ASSERT
-    assert(x.isVariable());
+    CCASSERT(x.isVariable());
 #endif
     rank1_booleanity(S, x.var());
 }
@@ -53,7 +53,7 @@ void rank1_split(SYS<FR>& S,
                  const std::vector<snarklib::R1Term<FR>>& b)
 {
 #ifdef USE_ASSERT
-    assert(x.isVariable());
+    CCASSERT(x.isVariable());
 #endif
 
     snarklib::R1Combination<FR> LC;
@@ -126,7 +126,7 @@ void rank1_shiftleft(std::vector<snarklib::R1Term<FR>>& x,
                      const std::size_t n)
 {
 #ifdef USE_ASSERT
-    assert(! x.empty());
+    CCASSERT(! x.empty());
 #endif
     if (0 == n) return; // do nothing
 
@@ -146,7 +146,7 @@ void rank1_shiftright(std::vector<snarklib::R1Term<FR>>& x,
                       const std::size_t n)
 {
 #ifdef USE_ASSERT
-    assert(! x.empty());
+    CCASSERT(! x.empty());
 #endif
     if (0 == n) return; // do nothing
 
@@ -166,7 +166,7 @@ void rank1_rotateleft(std::vector<snarklib::R1Term<FR>>& x,
                       const std::size_t n)
 {
 #ifdef USE_ASSERT
-    assert(! x.empty());
+    CCASSERT(! x.empty());
 #endif
     if (0 == n) return; // do nothing
 
@@ -186,7 +186,7 @@ void rank1_rotateright(std::vector<snarklib::R1Term<FR>>& x,
                        const std::size_t n)
 {
 #ifdef USE_ASSERT
-    assert(! x.empty());
+    CCASSERT(! x.empty());
 #endif
     if (0 == n) return; // do nothing
 
@@ -236,8 +236,8 @@ rank1_xword(
     } else {
 #ifdef USE_ASSERT
         // source and destination are not finite scalar field
-        assert(sizeBits(FR::zero()) != x.size());
-        assert(sizeBits(FR::zero()) != returnSize);
+        CCASSERT(sizeBits(FR::zero()) != x.size());
+        CCASSERT(sizeBits(FR::zero()) != returnSize);
 #endif
 
         // source is unsigned integer: 8-bit, 32-bit, 64-bit, 128-bit

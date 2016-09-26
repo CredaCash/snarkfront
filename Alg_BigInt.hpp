@@ -53,8 +53,8 @@ void evalStackCmp_Scalar(std::stack<ALG>& S, const ScalarCmp op)
             x = RS->argBits(L);
 
 #ifdef USE_ASSERT
-        assert(y.size() == sizeBits(yvalue));
-        assert(x.size() == sizeBits(xvalue));
+        CCASSERT(y.size() == sizeBits(yvalue));
+        CCASSERT(x.size() == sizeBits(xvalue));
 #endif
 
         // intermediate constraint variables for each bit

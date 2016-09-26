@@ -22,11 +22,11 @@ public:
         : m_lut(1, T::one())
     {}
 
-    const T& lookUp(const std::size_t index) 
+    const T& lookUp(const std::size_t index)
     {
         // protect against huge index from accidental pointer argument
 #ifdef USE_ASSERT
-        assert(index < 1024);
+        CCASSERT(index < 1024);
 #endif
 
         for (std::size_t i = m_lut.size(); i <= index; ++i) {
@@ -129,19 +129,20 @@ std::vector<int> valueBits(const std::uint64_t& a);
 template <mp_size_t N>
 std::vector<int> valueBits(const snarklib::BigInt<N>& a) {
     std::vector<int> v;
+#if 0	// not needed
     v.reserve(sizeBits(a));
 
     for (std::size_t i = 0; i < sizeBits(a); ++i) {
         v.push_back(a.testBit(i));
     }
-
+#endif
     return v;
 }
 
 template <typename T, std::size_t N>
 std::vector<int> valueBits(const snarklib::Field<T, N>& a) {
 #ifdef USE_ASSERT
-    assert(1 == a.dimension()); // always true for elliptic curve
+    CCASSERT(1 == a.dimension()); // always true for elliptic curve
                                 // scalar field
 #endif
     return valueBits(a[0].asBigInt());
@@ -172,7 +173,7 @@ std::size_t countBits(const std::vector<int>& v);
 
 // overflow addition (uint8_t, uint32_t and uint64_t)
 template <typename UINT_N>
-void addover(UINT_N& a1, UINT_N& a0, const UINT_N& b) 
+void addover(UINT_N& a1, UINT_N& a0, const UINT_N& b)
 {
     // a0 = 2 * a0_half + a0_bit
     // b = 2 * b_half + b_bit

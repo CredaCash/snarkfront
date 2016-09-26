@@ -1,3 +1,4 @@
+#include <CCassert.h>
 #include "snarkfront/EnumOps.hpp"
 
 using namespace std;
@@ -46,6 +47,8 @@ LogicalOps eqToLogical(const EqualityCmp op) {
     case (EqualityCmp::EQ) : return LogicalOps::SAME;
     case (EqualityCmp::NEQ) : return LogicalOps::XOR;
     }
+	CCASSERT(0);
+	return (LogicalOps)0;
 }
 
 LogicalOps eqToLogical(const ScalarCmp op) {

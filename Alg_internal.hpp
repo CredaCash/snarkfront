@@ -83,7 +83,7 @@ void evalStackCmp_Equality(std::stack<ALG>& S, const EqualityCmp op)
     const std::vector<R1T> y = RS->argBits(R);
 
 #ifdef USE_ASSERT
-    assert(y.size() >= sizeBits(yvalue));
+    CCASSERT(y.size() >= sizeBits(yvalue));
 #endif
 
     // x is left argument
@@ -94,7 +94,7 @@ void evalStackCmp_Equality(std::stack<ALG>& S, const EqualityCmp op)
     const std::vector<R1T> x = RS->argBits(L);
 
 #ifdef USE_ASSERT
-    assert(x.size() >= sizeBits(xvalue));
+    CCASSERT(x.size() >= sizeBits(xvalue));
 #endif
 
     // intermediate constraint variables for each bit

@@ -6,10 +6,10 @@
 
 #include <snarkfront/Alg.hpp>
 #include <snarkfront/Alg_BigInt.hpp>
-#include <snarkfront/Alg_bool.hpp>
-#include <snarkfront/Alg_Field.hpp>
-#include <snarkfront/Alg_uint.hpp>
-#include <snarkfront/BitwiseAST.hpp>
+//#include <snarkfront/Alg_bool.hpp>
+//#include <snarkfront/Alg_Field.hpp>
+//#include <snarkfront/Alg_uint.hpp>
+//#include <snarkfront/BitwiseAST.hpp>
 
 namespace snarkfront {
 
@@ -141,6 +141,7 @@ AST_Op<Alg_Field<FR>> inverse(const AST_Node<Alg_Field<FR>>& x) {
 // bitwise shift and rotate
 //
 
+#if 0 // no Bitwise
 #define DEFN_PERMUTE(ALG, OP, ENUM)                             \
     template <typename FR>                                      \
     AST_Op<Alg_ ## ALG<FR>>                                     \
@@ -168,6 +169,7 @@ AST_Op<Alg_Field<FR>> inverse(const AST_Node<Alg_Field<FR>>& x) {
     DEFN_PERMUTE(uint64, ROTR, ROTR)
 
 #undef DEFN_PERMUTE
+#endif // no Bitwise
 
 ////////////////////////////////////////////////////////////////////////////////
 // comparison
@@ -355,6 +357,7 @@ AST_X< OUT >* _xword(const AST_Node< IN >& x,           \
 // conditional operator (ternary)
 //
 
+#if 0 // no Bitwise
 #define DEFN_TERNARY_UINT(N)                                            \
 template <typename FR>                                                  \
 AST_Op<Alg_uint ## N <FR>> ternary(                                     \
@@ -378,6 +381,7 @@ AST_Op<Alg_uint ## N <FR>>* _ternary(                                   \
     DEFN_TERNARY_UINT(64)
 
 #undef DEFN_TERNARY_UINT
+#endif // no Bitwise
 
 #define DEFN_TERNARY_SCALAR(T, AS)                              \
 template <typename FR>                                          \
@@ -483,6 +487,7 @@ std::array<V, N> ternary(                       \
 // array subscript
 //
 
+#if 0 // no Bitwise
 template <typename FR, std::size_t N>
 AST_Op<Alg_uint8<FR>> subscript(const std::array<std::uint8_t, N>& a,
                                 const AST_Node<Alg_uint8<FR>>& idx) {
@@ -494,6 +499,7 @@ AST_Op<Alg_uint8<FR>> subscript(const std::array<AST_Var<Alg_uint8<FR>>, N>& a,
                                 const AST_Node<Alg_uint8<FR>>& idx) {
     return BitwiseAST<Alg_uint8<FR>>::arraysubscript(a, idx);
 }
+#endif // no Bitwise
 
 } // namespace snarkfront
 

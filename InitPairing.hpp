@@ -25,26 +25,6 @@ BN128_PAIRING;
 // initialize elliptic curve parameters
 void init_BN128();
 
-////////////////////////////////////////////////////////////////////////////////
-// Edwards 80 bits
-//
-
-const mp_size_t EDWARDS_NRQ = snarklib::Edwards::q_limbs;
-
-extern const snarklib::BigInt<snarklib::Edwards_Modulus::r_limbs> EDWARDS_MODULUS_R;
-extern const snarklib::BigInt<snarklib::Edwards_Modulus::q_limbs> EDWARDS_MODULUS_Q;
-
-typedef typename
-snarklib::Edwards::Groups<EDWARDS_NRQ, EDWARDS_MODULUS_R, EDWARDS_MODULUS_Q>::Fr
-EDWARDS_FR;
-
-typedef typename
-snarklib::Edwards::Pairing<EDWARDS_NRQ, EDWARDS_MODULUS_R, EDWARDS_MODULUS_Q>
-EDWARDS_PAIRING;
-
-// initialize elliptic curve parameters
-void init_Edwards();
-
 } // namespace snarkfront
 
 #endif

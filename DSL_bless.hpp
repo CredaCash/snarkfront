@@ -7,7 +7,7 @@
 #include <sstream>
 #include <vector>
 
-#include <cryptl/Bless.hpp>
+//#include <cryptl/Bless.hpp>
 
 #include <snarkfront/DSL_base.hpp>
 #include <snarkfront/DSL_ppzk.hpp>
@@ -34,10 +34,13 @@ namespace snarkfront {
     DEFN_BLESS(uint32_x, std::uint32_t)
     DEFN_BLESS(uint64_x, std::uint64_t)
     DEFN_BLESS(bigint_x, std::string)
+    DEFN_BLESS(bigint_x, std::uint64_t)
+    DEFN_BLESS(bigint_x, bigint_t)
     DEFN_BLESS(field_x, FR)
 
 #undef DEFN_BLESS
 
+#if 0 // compiler errors
 template <typename FR>
 void bless(bigint_x<FR>& x,
            const std::uint64_t a,
@@ -53,6 +56,7 @@ void bless(bigint_x<FR>& x,
         assert_true(value64[1] == zero(value64[1]));
     }
 }
+#endif
 
 // initialize variable
 #define DEFN_BLESS(X, A)                        \
@@ -81,7 +85,7 @@ void bless(std::array<T, N>& a, const std::array<U, N>& b) {
 template <typename T, typename U>
 void bless(std::vector<T>& a, const std::vector<U>& b) {
 #ifdef USE_ASSERT
-    assert(a.size() == b.size());
+    CCASSERT(a.size() == b.size());
 #endif
     for (std::size_t i = 0; i < a.size(); ++i)
         bless(a[i], b[i]);
@@ -119,7 +123,7 @@ void bless_internal(std::array<T, N>& x, const U& a, const bool bigEndian) {
         sizeU = sizeBits(a);
 
 #ifdef USE_ASSERT
-    assert(sizeT * N == sizeU);
+    CCASSERT(sizeT * N == sizeU);
 #endif
 
     typedef typename T::FrType FR;
@@ -169,7 +173,7 @@ void bless(std::array<T, N>& x,
            const std::array<U, M>& a,
            const bool bigEndian = true) { // SHA message buffer is big-endian
 #ifdef USE_ASSERT
-    assert(0 == N % M);
+    CCASSERT(0 == N % M);
 #endif
 
     for (std::size_t i = 0; i < M; ++i) {
@@ -197,6 +201,7 @@ void bless(std::array<T, N>& a, const R1Cowitness<FR>& input) {
     for (auto& x : a) bless(x, input);
 }
 
+#if 0 // no cryptl
 // 8-bit octet variable from input stream
 template <typename FR>
 bool bless(snarkfront::uint8_x<FR>& x, std::istream& is) {
@@ -252,6 +257,7 @@ bool bless(snarkfront::uint64_x<FR>& x, std::istream& is) {
         return false;
     }
 }
+#endif // no cryptl
 
 // 64-bit octet variable array from input stream
 template <typename FR, std::size_t N>

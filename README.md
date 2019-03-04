@@ -20,7 +20,7 @@ The author is grateful to the [SCIPR Lab] for the [GitHub libsnark project].
 This project is built on top of the [GitHub snarklib project] which was made
 possible by the libsnark source code release.
 
-Modifications for the CredaCash&trade; project Copyright &copy; 2015-2016 Creda Software, Inc.
+Modifications for the CredaCash&trade; project Copyright &copy; 2015-2019 Creda Software, Inc.
 CredaCash is a trademark of Creda Software, Inc.
 
 --------------------------------------------------------------------------------

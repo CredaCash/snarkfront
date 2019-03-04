@@ -145,6 +145,46 @@ snarklib::BigInt<N> operator* (const snarklib::BigInt<N>& a,
     return c;
 }
 
+//
+// a / b --> c
+//
+template <mp_size_t N>
+bool divBigInt(const snarklib::BigInt<N>& a,
+               const snarklib::BigInt<N>& b,
+               snarklib::BigInt<N>& c)
+{
+    std::array<mp_limb_t, N> scratch;
+
+	c.clear();
+
+	// Divide num by den, put quotient at quot and remainder at rem
+	// The most significant limb of the divisor must be non-zero
+	// mpn_tdiv_qr(mp_limb_t *quot, mp_limb_t *rem, 0, const mp_limb_t *num, mp_size_t n_num, const mp_limb_t *den, mp_size_t n_den)
+	for (int i = b.numberLimbs(); i > 0; --i)
+	{
+		if (b.data()[i-1])
+		{
+			mpn_tdiv_qr(c.data(), scratch.data(), 0, a.data(), a.numberLimbs(), b.data(), i);
+			return true;
+		}
+	}
+
+	return false;	// divide by zero error
+}
+
+template <mp_size_t N>
+snarklib::BigInt<N> operator/ (const snarklib::BigInt<N>& a,
+                               const snarklib::BigInt<N>& b)
+{
+    snarklib::BigInt<N> c;
+    const bool ok = divBigInt(a, b, c);
+#ifdef USE_ASSERT
+    CCASSERT(ok);
+#endif
+	if (!ok) c = a.data()[0] / b.data()[0];	// throw divide by zero exception
+    return c;
+}
+
 template <mp_size_t N>
 snarklib::BigInt<N> operator/ (const snarklib::BigInt<N>& n, const mp_limb_t& d)
 {
@@ -179,17 +219,35 @@ int cmpBigInt (const snarklib::BigInt<N>& a,
 }
 
 template <mp_size_t N>
+bool operator< (const snarklib::BigInt<N>& a,
+                               const snarklib::BigInt<N>& b)
+{
+	return mpn_cmp(a.data(), b.data(), N) < 0;
+	//return cmpBigInt(a,b) < 0;
+}
+
+template <mp_size_t N>
+bool operator<= (const snarklib::BigInt<N>& a,
+                               const snarklib::BigInt<N>& b)
+{
+	return mpn_cmp(a.data(), b.data(), N) <= 0;
+	//return cmpBigInt(a,b) <= 0;
+}
+
+template <mp_size_t N>
 bool operator> (const snarklib::BigInt<N>& a,
                                const snarklib::BigInt<N>& b)
 {
-	return cmpBigInt(a,b) > 0;
+	return mpn_cmp(a.data(), b.data(), N) > 0;
+	//return cmpBigInt(a,b) > 0;
 }
 
 template <mp_size_t N>
 bool operator>= (const snarklib::BigInt<N>& a,
                                const snarklib::BigInt<N>& b)
 {
-	return cmpBigInt(a,b) >= 0;
+	return mpn_cmp(a.data(), b.data(), N) >= 0;
+	//return cmpBigInt(a,b) >= 0;
 }
 
 //

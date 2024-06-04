@@ -293,6 +293,10 @@ public:
         return *this;
     }
 
+    AST_Var(const AST_Var& other) {
+        m_alg = *other;
+    }
+
     // copy assignment from lazy variable
     AST_Var& operator= (Lazy<AST_Var, typename ALG::ValueType>& other) {
         return *this = *other; // unboxing here

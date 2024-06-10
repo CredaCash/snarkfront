@@ -3,9 +3,9 @@
 
 #include <gmp.h>
 
+#include <snarkfront/BigIntOps.hpp>
 #include <snarkfront/Alg.hpp>
 #include <snarkfront/Alg_internal.hpp>
-#include <snarkfront/BigIntOps.hpp>
 
 namespace snarkfront {
 

@@ -16,12 +16,21 @@ class TL
 public:
     ~TL() = default;
 
-    static TL<T>& singleton() {
+    static TL<T>& singleton(bool delete_ = false) {
         thread_local static TL<T> *obj;
-		if (!obj)
+		if (!obj && !delete_)
 		{
-			obj = new TL<T>;	// memory leak
+			obj = new TL<T>;
+
 			//std::cerr << "class TL new thread_local object at " << std::hex << (std::uintptr_t)obj << std::dec << std::endl;
+		}
+		else if (obj && delete_)
+		{
+			//std::cerr << "class TL deleting thread_local object at " << std::hex << (std::uintptr_t)obj << std::dec << std::endl;
+
+			delete obj;
+
+			obj = NULL;
 		}
         return *obj;
     }
